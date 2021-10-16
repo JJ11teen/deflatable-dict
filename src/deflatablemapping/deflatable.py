@@ -1,7 +1,7 @@
 from typing import MutableMapping
 
 
-class DeflatableMapping(MutableMapping):
+class Deflatable(MutableMapping):
     def __init__(self, d=None, sep=".") -> None:
         self._sep = sep
         self.d = {}
@@ -16,7 +16,7 @@ class DeflatableMapping(MutableMapping):
         items = []
         for k, v in self.d.items():
             if v and isinstance(v, MutableMapping):
-                for dk, dv in DeflatableMapping(v, sep=self._sep).deflate().items():
+                for dk, dv in Deflatable(v, sep=self._sep).deflate().items():
                     items.append((f"{k}{self._sep}{dk}", dv))
             else:
                 items.append((k, v))
@@ -36,10 +36,10 @@ class DeflatableMapping(MutableMapping):
         levels = k.split(self._sep)
         for sub_key in levels[:-1]:
             if sub_key not in context:
-                context[sub_key] = DeflatableMapping()
+                context[sub_key] = Deflatable()
             context = context[sub_key]
         if isinstance(v, MutableMapping):
-            v = DeflatableMapping(v)
+            v = Deflatable(v)
         context[levels[-1]] = v
 
     def __delitem__(self, k) -> None:
