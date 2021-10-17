@@ -11,15 +11,23 @@ def test_dict_get_set():
     assert df["b"] == "string"
 
 
-def test_dict_len():
+def test_dict_len_update():
     df = DeflatableMap(sep=".")
 
     assert len(df) == 0
 
-    df = DeflatableMap({"a": 0}, sep=".")
-    df["b"] = "string"
+    df.update({"a": 0, "b": 1.0})
+    df["c"] = "string"
 
-    assert len(df) == 2
+    assert len(df) == 3
+
+
+def test_dict_iter(flat_dict):
+    df = DeflatableMap(flat_dict, sep=".")
+
+    for ((k1, v1), (k2, v2)) in zip(df.items(), flat_dict.items()):
+        assert k1 == k2
+        assert v1 == v2
 
 
 def test_inflating_items(flat_deliminated_dict, nested_dict):
@@ -29,6 +37,8 @@ def test_inflating_items(flat_deliminated_dict, nested_dict):
     )
 
     assert df == nested_dict
+    for key in flat_deliminated_dict.keys():
+        assert key in df
 
 
 def test_auto_flattening(flat_deliminated_dict, nested_dict):
