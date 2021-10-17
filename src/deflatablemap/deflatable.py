@@ -26,7 +26,7 @@ class DeflatableMap(MutableMapping):
         value = self.d
         for level in k.split(self._sep):
             if not isinstance(value, MutableMapping):
-                raise KeyError(f"Key {k} does not exist")
+                raise KeyError(k)
             else:
                 value = value[level]
         return value
