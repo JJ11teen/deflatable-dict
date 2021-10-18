@@ -1,7 +1,6 @@
 from typing import MutableMapping
 
 import pytest
-from deflatabledict import DeflatableDict
 
 
 def test_dict_get_set(d: MutableMapping):
@@ -33,8 +32,10 @@ def test_dict_errors(d: MutableMapping):
         del d["b"]
 
 
-def test_dict_iter(d: MutableMapping, flat_dict):
-    d.update(flat_dict)
-    for ((k1, v1), (k2, v2)) in zip(d.items(), flat_dict.items()):
+def test_dict_iter(d: MutableMapping):
+    standard_dict = {"a": False, "b": 1, "c": 2, "d": "3", "e": b"4"}
+
+    d.update(standard_dict)
+    for ((k1, v1), (k2, v2)) in zip(d.items(), standard_dict.items()):
         assert k1 == k2
         assert v1 == v2

@@ -4,18 +4,53 @@ import pytest
 
 
 @pytest.fixture()
-def flat_dict():
-    return {"a": False, "b": 1, "c": 2, "d": "3", "e": b"4"}
-
-
-@pytest.fixture()
-def flat_deliminated_dict():
-    return {"a.a": False, "a.b.a": 1, "a.b.b": 2, "a.b.c.a": "3", "a.b.c.b": b"4"}
-
-
-@pytest.fixture()
 def nested_dict():
-    return {"a": {"a": False, "b": {"a": 1, "b": 2, "c": {"a": "3", "b": b"4"}}}}
+    return {
+        "a": {
+            "1": False,
+            "2": {
+                "a": 1,
+                "b": 2,
+                "c": {
+                    "1": "3",
+                    "2": b"4",
+                },
+                "d": {
+                    "1": 1.0,
+                    "2": 2.0,
+                },
+            },
+        },
+        "b": [-1, -2],
+    }
+
+
+@pytest.fixture()
+def flat_period_delimited_dict():
+    return {
+        "a.1": False,
+        "a.2.a": 1,
+        "a.2.b": 2,
+        "a.2.c.1": "3",
+        "a.2.c.2": b"4",
+        "a.2.d.1": 1.0,
+        "a.2.d.2": 2.0,
+        "b": [-1, -2],
+    }
+
+
+@pytest.fixture()
+def flat_slash_delimited_dict():
+    return {
+        "a/1": False,
+        "a/2/a": 1,
+        "a/2/b": 2,
+        "a/2/c/1": "3",
+        "a/2/c/2": b"4",
+        "a/2/d/1": 1.0,
+        "a/2/d/2": 2.0,
+        "b": [-1, -2],
+    }
 
 
 def pytest_generate_tests(metafunc):
