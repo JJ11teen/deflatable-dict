@@ -47,3 +47,6 @@ def test_deflating(flat_deliminated_dict, nested_dict):
 
     assert dd == nested_dict
     assert dd.deflate() == flat_deliminated_dict
+
+    # This tests the __repr__
+    assert str(dd) == str(flat_deliminated_dict)
