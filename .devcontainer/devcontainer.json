@@ -23,7 +23,7 @@
 			"--project",
 			"src",
 			"--project",
-			"inflatablemapping",
+			"deflatabledict",
 		],
 		"[python]": {
 			"editor.codeActionsOnSave": {

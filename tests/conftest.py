@@ -1,3 +1,5 @@
+from typing import DefaultDict
+
 import pytest
 
 
@@ -14,3 +16,11 @@ def flat_deliminated_dict():
 @pytest.fixture()
 def nested_dict():
     return {"a": {"a": False, "b": {"a": 1, "b": 2, "c": {"a": "3", "b": b"4"}}}}
+
+
+def pytest_generate_tests(metafunc):
+    if "d" in metafunc.fixturenames:
+        metafunc.parametrize(
+            "d",
+            [{}, DefaultDict()],
+        )
