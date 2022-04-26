@@ -36,7 +36,7 @@ dd["a"] # { "1": True, "2": False }
 A DeflatableDict can be deflated with `.deflate()`. This returns a standard dictionary object with flattened keys constructed by concatenating the nested keys with the DeflatableDict's delimiter. A DeflatableDict uses it's deflated form for its string representation.
 
 ## Delimiter
-A DeflatableDict can have it's delimiter specified by passing the desired delimiter as the `delimiter` parameter to the DeflatableDict constructor. If not explicitly specified the delimiter is `.`.
+A DeflatableDict can have it's delimiter specified by passing the desired delimiter as the `_delimiter` parameter to the DeflatableDict constructor. If not explicitly specified the delimiter is `.`.
 
 ## Inflation
 A DeflatableDict will automatically inflate any values that are inserted into it. For example:
