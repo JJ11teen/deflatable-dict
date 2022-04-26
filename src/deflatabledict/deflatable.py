@@ -1,34 +1,36 @@
 from collections import UserDict
 from typing import Any, MutableMapping, MutableSequence
 
+from idna import check_initial_combiner
+
 
 class DeflatableDict(UserDict):
     def __init__(
         self,
         *args,
         _delimiter=".",
-        _delimit_lists=True,
+        _flatten_lists=True,
         _delimiter_list_start="[",
         _delimiter_list_end="]",
+        _list_append_key=None,
         **kwargs,
     ) -> None:
         self.data = dict()
         initial_data = dict(*args, **kwargs)
 
         self._delimiter = _delimiter
-        self._delimit_lists = _delimit_lists
+        self._flatten_lists = _flatten_lists
         self._delimiter_list_start = _delimiter_list_start
         self._delimiter_list_end = _delimiter_list_end
+        self._list_append_key = _list_append_key
 
-        if self._delimit_lists:
-            if (
-                self._delimiter == self._delimiter_list_start
-                or self._delimiter == self._delimiter_list_end
-                or self._delimiter_list_start == self._delimiter_list_end
-            ):
+        if self._flatten_lists:
+            delimiters = set(
+                [self._delimiter, self._delimiter_list_start, self._delimiter_list_end, self._list_append_key]
+            )
+            if len(delimiters) < 4:
                 raise ValueError(
-                    "Delimiter and list delimiter cannot be the same. "
-                    f"Got '{self._delimiter}', '{self._delimiter_list_start}', '{self._delimiter_list_end}'."
+                    "All four of delimiter, list delimiters, and list append key must be unique. Only got {delimiters}."
                 )
 
         for k, v in initial_data.items():
@@ -53,14 +55,14 @@ class DeflatableDict(UserDict):
         for sub_key in k.split(self._delimiter):
             if isinstance(v, MutableMapping):
                 v = v[sub_key]
-            elif self._delimit_lists and isinstance(v, MutableSequence):
+            elif self._flatten_lists and isinstance(v, MutableSequence):
                 v = v[int(sub_key[len(self._delimiter_list_start) : -len(self._delimiter_list_end)])]
             else:
                 raise KeyError(k)
 
         # Check if this is a delimited list, if so convert back to a list:
         if (
-            self._delimit_lists
+            self._flatten_lists
             and isinstance(v, MutableMapping)
             and len(v) > 0
             and not any(
@@ -83,7 +85,7 @@ class DeflatableDict(UserDict):
             raise KeyError("Key cannot start or end with delimiter")
 
         # Check if this is a list to delimit, if so convert to a delimited list (really a dict):
-        if self._delimit_lists and isinstance(v, MutableSequence):
+        if self._flatten_lists and isinstance(v, MutableSequence):
             v = {f"{self._delimiter_list_start}{i}{self._delimiter_list_end}": dv for i, dv in enumerate(v)}
 
         # Convert nested mappings (ie handle child layers first)
@@ -94,12 +96,29 @@ class DeflatableDict(UserDict):
         context = self.data
         sub_keys = k.split(self._delimiter)
         for sub_key in sub_keys[:-1]:
-            if sub_key not in context:
-                context[sub_key] = DeflatableDict()
+            if isinstance(context, MutableMapping):
+                if sub_key not in context:
+                    context[sub_key] = DeflatableDict()
             context = context[sub_key]
 
-        # Insert our (possibly converted) value into our context (ie our data dict)
-        context[sub_keys[-1]] = v
+        # Insert our (possibly converted) value into our context.
+        # If out context is a list, we need to handle indexing & appending,
+        # otherwise it is a dict and we can just assign
+        if self._flatten_lists and isinstance(context, MutableSequence):
+            i_str = sub_keys[-1][len(self._delimiter_list_start) : -len(self._delimiter_list_end)]
+            if self._list_append_key is not None and i_str == self._list_append_key:
+                context.append(v)
+            else:
+                i = int(i_str)
+                if len(context) > i:
+                    context[i] = v
+                else:
+                    raise IndexError(
+                        f"Cannot assign to '{k}' as the innermost list assignment index is out of range. "
+                        f"Use the list append key '{self._list_append_key}' to append instead of assigning."
+                    )
+        else:
+            context[sub_keys[-1]] = v
 
     def __delitem__(self, k) -> None:
         # Quick validation of key values:
