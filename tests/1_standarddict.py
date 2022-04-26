@@ -39,3 +39,13 @@ def test_dict_iter(d: MutableMapping):
     for ((k1, v1), (k2, v2)) in zip(d.items(), standard_dict.items()):
         assert k1 == k2
         assert v1 == v2
+
+
+def test_inner_list(d: MutableMapping):
+    d["a"] = ["one", "two", "three"]
+
+    assert len(d["a"]) == 3
+
+    assert d["a"][0] == "one"
+    assert d["a"][1] == "two"
+    assert d["a"][2] == "three"
