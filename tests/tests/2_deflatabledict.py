@@ -55,7 +55,7 @@ def test_deflating(nested_dict, flat_period_delimited_dict):
 
 
 def test_flat_string_repr(nested_dict, flat_period_delimited_dict):
-    dd = DeflatableDict(nested_dict, delimiter=".")
+    dd = DeflatableDict(nested_dict, _delimiter=".")
 
     assert str(dd) == str(flat_period_delimited_dict)
 

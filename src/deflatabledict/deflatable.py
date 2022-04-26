@@ -52,14 +52,20 @@ class DeflatableDict(UserDict):
         v = self.data
         for sub_key in k.split(self._delimiter):
             if not isinstance(v, MutableMapping):
-                raise KeyError(k)
-            else:
-                v = v[sub_key]
+                if not self._delimit_lists or not isinstance(v, MutableSequence):
+                    raise KeyError(k)
+            # TODO: figure out a way to not need to do this??
+            # context: indexing v triggers __getitem__ on the child, which may be a list and therefore
+            # get converted, and not be able to be indexed by a string in the following round (ie v['[0]'])
+            if isinstance(v, MutableSequence):
+                v = {f"{self._delimiter_list_start}{i}{self._delimiter_list_end}": dv for i, dv in enumerate(v)}
+            v = v[sub_key]
 
         # Check if this is a delimited list, if so convert back to a list:
         if (
             self._delimit_lists
             and isinstance(v, MutableMapping)
+            and len(v) > 0
             and not any(
                 [
                     not k.startswith(self._delimiter_list_start) or not k.endswith(self._delimiter_list_end)
